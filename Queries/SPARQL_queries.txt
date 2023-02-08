@@ -1,0 +1,166 @@
+1. Return the myths that are set in Athens, teach punishment and, optionally, the other principles they teach 
+   (avoided joins for e.g. ?m rdf:type :Myth since already specified in the domain of the object property's domain) 
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?m ?p
+WHERE {
+	?m :setIn :Athens .
+	?m :teaches :Punishment .
+	OPTIONAL {?m :teaches ?p .}
+	FILTER (?p != :Punishment)
+}
+ 
+2. Return all the mortals that lives in a place different from the one where they were born, returning also the latters.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?m ?birthplace ?livingplace
+WHERE {
+	?m rdf:type :Mortal .
+	?m :bornIn ?livingplace .
+	?m :livesIn ?birthplace .
+	FILTER (?livingplace != ?birthplace)
+}
+
+3. Return the being that kills their consort or lover (dying at an age > 30) and, optionally, their original greek name.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT ?b  ?greekName ?consort ?lover
+WHERE {{
+	?b :hasLover ?lover .
+	?b :kills ?lover .
+	?lover :deadAtAge ?loverAge .
+	FILTER (?loverAge > 30)
+	}
+	UNION {
+	?b :hasConsort ?consort .
+	?b :kills ?consort .
+	?consort :deadAtAge ?ConsortAge .
+	FILTER (?ConsortAge > 30)
+	}
+	OPTIONAL { ?b :hasGreekName ?greekName . }
+}
+
+4. Return all mortal lovers of Zeus, having at least a child with him, and their shared children. 
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?l  ?child
+WHERE {
+	?l rdf:type :Mortal.
+	?l :hasLover :Zeus .
+	?l :hasChild ?child .
+	?child :hasParent :Zeus .
+}
+
+5. Return the heroes that has defeated at least a mortal ally of some of their enemies, returning all of them.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?hero ?enemy ?defeatedEnemyAlly
+WHERE {
+	?hero :hasEnemy ?enemy .
+	?enemy :hasAlly ?defeatedEnemyAlly .
+	?hero :defeats ?defeatedEnemyAlly .
+	?defeatedEnemyAlly rdf:type :Mortal .
+}
+
+6. Return all the enemies of Zeus appearing in at least one myth and having some children that has as enemy a children of Zeus.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?enemy ?child 
+WHERE {
+	?enemy :hasEnemy :Zeus .
+	?enemy :appearsIn ?m .
+	?m rdf:type :Myth .
+	?child :hasParent ?enemy .
+	?child :hasEnemy ?zeusChild .
+	?zeusChild :hasParent :Zeus .
+}
+
+7. Return the principles taught by a myth that are also representative of some god appearing in it, returning also the myth and the god 
+   (joins with rdf:type are avoided for computational reasons having it defined in the object property domain).
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?p ?m ?god
+WHERE {
+	?m :teaches ?p .
+	?god :isRepresentativeOf ?p .
+	?god :appearsIn ?m .
+}
+
+8. Return all the mortals dead at more than 25 years old and are killed by some hero, optionally returning also their place of birth.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?m ?birthPlace ?hero
+WHERE {
+	?hero rdf:type :Hero .
+	?hero :kills ?m .
+	?m :deadAtAge ?age .
+	FILTER (?age > 25)
+	OPTIONAL {?m :bornIn ?birthPlace .}
+}
+
+9. Return all the gods that has at least one priest living in Delphi and, optionally, the principles they represent.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?god ?principle
+WHERE {
+	?priest :isPriestOf ?god .
+	?priest :livesIn :Delphi .
+	OPTIONAL {?god :isRepresentativeOf ?principle .}
+}
+
+10. Return all the myths where at least one sibling of Zeus appears and he/she is representative of a principle that
+    is represented also by a titan and, optionally, the places where they are set in.
+
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/angel/ontologies/2023/1/mythontology#>
+
+SELECT DISTINCT ?myth ?place 
+WHERE {
+	?myth :hasCharacter ?zeusSibling .
+	?zeusSibling :hasParent ?parent1 .
+	?zeusSibling :hasParent ?parent2 .
+	:Zeus :hasParent ?parent1 .
+	:Zeus :hasParent ?parent2 .
+	?zeusSibling :isRepresentativeOf ?principle .
+	?titan :isTitanOf ?principle .
+	OPTIONAL {?myth :setIn ?place .}
+	FILTER (?zeusSibling != :Zeus)
+}

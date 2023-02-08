@@ -1,0 +1,29 @@
+1. Return the Demi-God, sons of a God and a Mortal (-> Create class Demi-God).
+(hasParent some Mortal) and (hasParent some God)
+
+2. Return all mortal lovers of Zeus that have at least a child.
+Mortal and (hasLover value Zeus) and (hasChild some Mortal)
+
+3. Return all mortals that defeats some Olympian God and plays some mortal object.
+Mortal and (defeats some OlympianGod) and (plays some MortalObject)
+
+4. Return all being that are transformed by some god that represent the principle Beauty.
+Being and (isTransformedBy some (isGodOf value Beauty))
+
+5. Return some myth where appears some titan that has at least an olympian god as enemy.
+Myth and (hasCharacter some (Titan and (hasEnemy some OlympianGod))) 
+
+6. Return the warrior appearing in the Iliad that fights with the Arc or with the shield. 
+Warrior and (appearsIn value Iliad) and (fightsWith value Arc) or fightsWith value Shield 
+
+7. Return all the myths that are set in the Underworld and where Hades and Persephone appears in.
+Myth and setIn some Underworld and hasCharacter value Hades and hasCharacter value Persephone
+
+8. Return all the myth that are set in more than one place and are not set only in cities.
+Myth and setIn min 2 Place and not(setIn only City)
+
+9. Return all the myth having at least one character (Being) that has Apollo as enemy but doesn't have only olympian gods as enemies.
+Myth and (hasCharacter some (hasEnemy value Apollo and not(hasEnemy only OlympianGod)))
+
+10. Return all the heroes that kills some creature in a myth set in the underworld.
+Hero and kills some Creature and appearsIn some (Myth and setIn some Underworld)
